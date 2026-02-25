@@ -1,26 +1,57 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-kawaii-pink: #F5A9B8;
+  --color-kawaii-pink-dark: #D4628B;
+  --color-kawaii-lavender: #5BCEFA;
+  --color-kawaii-mint: #A8E6F0;
+  --color-kawaii-peach: #F5D6E0;
+  --color-kawaii-cream: #F0F8FF;
+  --color-kawaii-rose: #FDE8EF;
+
+  --radius-kawaii: 1rem;
+
+  --shadow-kawaii: 0 4px 14px 0 rgba(91, 206, 250, 0.3);
+
+  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@keyframes bounce-in {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.animate-bounce-in {
+  animation: bounce-in 0.3s ease-out;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F0F8FF;
+}
+::-webkit-scrollbar-thumb {
+  background: #5BCEFA;
+  border-radius: 3px;
+}
+
+/* Range slider styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: #FDE8EF;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #D4628B;
+  cursor: pointer;
+  border: 3px solid white;
+  box-shadow: 0 2px 6px rgba(212, 98, 139, 0.4);
 }
