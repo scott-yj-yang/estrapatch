@@ -127,10 +127,10 @@ export default function ApplyPatchPage() {
 
               {/* Patch dose */}
               <div className="bg-kawaii-rose/30 rounded-kawaii p-3">
-                <label className="block text-sm font-semibold text-kawaii-pink-dark mb-2">
+                <label htmlFor="apply-dose" className="block text-sm font-semibold text-kawaii-pink-dark mb-2">
                   Patch Dose
                 </label>
-                <DoseSelector value={dose} onChange={setDose} className="w-full" />
+                <DoseSelector id="apply-dose" value={dose} onChange={setDose} className="w-full" />
               </div>
 
               {/* Wear time setting */}

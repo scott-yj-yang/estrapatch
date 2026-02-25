@@ -178,10 +178,11 @@ export default function SettingsPage() {
         {/* Default Dose */}
         <Card title="Default Dose">
           <div className="space-y-2">
-            <label className="block text-xs font-semibold text-gray-600 mb-1">
+            <label htmlFor="settings-dose" className="block text-xs font-semibold text-gray-600 mb-1">
               Dose per patch
             </label>
             <DoseSelector
+              id="settings-dose"
               value={Number(settings.default_dose_mg_per_day ?? "0.1")}
               onChange={(dose) => handleSave("default_dose_mg_per_day", String(dose))}
             />

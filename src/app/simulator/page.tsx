@@ -364,10 +364,10 @@ export default function SimulatorPage() {
                   formatValue={(v) => `${v}h (${(v / 24).toFixed(1)}d)`}
                 />
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">
+                  <label htmlFor="whatif-dose" className="block text-xs font-semibold text-gray-600 mb-1">
                     Patch Dose
                   </label>
-                  <DoseSelector value={whatIfDose} onChange={setWhatIfDose} />
+                  <DoseSelector id="whatif-dose" value={whatIfDose} onChange={setWhatIfDose} />
                 </div>
               </div>
             </Card>
