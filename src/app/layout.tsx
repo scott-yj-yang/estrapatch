@@ -37,6 +37,11 @@ export default function RootLayout({
         <NavBar />
         <NotificationSetup />
         <ReminderPoller />
+        <footer className="text-center py-3 px-4 border-t border-kawaii-pink/20">
+          <p className="text-[10px] text-gray-400 leading-snug">
+            EstaPatch is not a medical device. Estimates are for informational and educational purposes only. Use at your own risk.
+          </p>
+        </footer>
       </body>
     </html>
   );
