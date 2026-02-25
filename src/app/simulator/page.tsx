@@ -22,7 +22,10 @@ import {
   getCurrentE2Estimate,
   projectE2Forward,
   getRecommendations,
+  generatePatchWindows,
+  PatchWindow,
 } from "@/lib/pk-model";
+import PatchTimeline from "@/components/PatchTimeline";
 
 type Tab = "personal" | "whatif" | "playground";
 
@@ -56,6 +59,9 @@ export default function SimulatorPage() {
   const [whatIfDose, setWhatIfDose] = useState(0.1);
   const [whatIfData, setWhatIfData] = useState<SeriesPoint[]>([]);
   const [whatIfLoading, setWhatIfLoading] = useState(false);
+  const [showPatches, setShowPatches] = useState(false);
+  const [patchWindows, setPatchWindows] = useState<PatchWindow[]>([]);
+  const [whatIfPeriod] = useState(672); // 28 days, matching reference simulator
 
   const fetchPersonal = useCallback(async () => {
     setPersonalLoading(true);
@@ -128,20 +134,17 @@ export default function SimulatorPage() {
   const fetchWhatIf = useCallback(async () => {
     setWhatIfLoading(true);
     try {
-      const series = calculateE2Concentration({
-        patches,
-        spread,
-        worn,
-        period: 168,
-        doseMgPerDay: whatIfDose,
-      });
+      const params = { patches, spread, worn, period: whatIfPeriod, doseMgPerDay: whatIfDose };
+      const newWindows = generatePatchWindows(params);
+      setPatchWindows(newWindows);
+      const series = calculateE2Concentration(params);
       setWhatIfData(series);
     } catch (error) {
       console.error("Failed to compute what-if data:", error);
     } finally {
       setWhatIfLoading(false);
     }
-  }, [patches, spread, worn, whatIfDose]);
+  }, [patches, spread, worn, whatIfDose, whatIfPeriod]);
 
   const fetchPlaygroundData = useCallback(async () => {
     setPlaygroundLoading(true);
@@ -335,7 +338,7 @@ export default function SimulatorPage() {
             <Card title="Simulation Parameters">
               <div className="space-y-4">
                 <SimulatorSlider
-                  label="Patches per cycle"
+                  label="Patches per application"
                   value={patches}
                   min={1}
                   max={4}
@@ -370,12 +373,22 @@ export default function SimulatorPage() {
             </Card>
 
             <Card title="Simulated E2 Levels">
+              <div className="flex justify-end mb-2">
+                <button
+                  onClick={() => setShowPatches((v) => !v)}
+                  className="text-xs px-3 py-1 rounded-kawaii font-semibold bg-kawaii-rose text-kawaii-pink-dark hover:bg-kawaii-pink/30 transition-all"
+                >
+                  {showPatches ? "Show E2 Levels" : "Show Patches"}
+                </button>
+              </div>
               {whatIfLoading ? (
                 <div className="h-64 flex items-center justify-center text-kawaii-pink-dark animate-pulse">
                   Loading...
                 </div>
+              ) : showPatches ? (
+                <PatchTimeline windows={patchWindows} period={whatIfPeriod} />
               ) : (
-                <E2Chart data={whatIfData} period={168} />
+                <E2Chart data={whatIfData} period={whatIfPeriod} />
               )}
               <div className="mt-4 pt-4 border-t border-kawaii-pink/20">
                 <FDAReference />

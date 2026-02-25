@@ -4,11 +4,40 @@ export interface SeriesData {
 }
 
 export interface SimulationParams {
-  patches: number; // Number of patches applied per period
-  spread: number; // Hours between patch applications within a period
+  patches: number; // Number of patches applied per application event
+  spread: number; // Hours between application events (rolling schedule)
   worn: number; // How long each patch is worn (hours)
-  period: number; // Hours between application periods (e.g. 84 for 3.5 days)
+  period: number; // Total simulation window in hours (e.g. 672 for 28 days)
   doseMgPerDay?: number; // Dose per patch in mg/day (default: 0.1)
+}
+
+export interface PatchWindow {
+  index: number;
+  appliedAt: number; // hour offset from simulation start
+  removedAt: number; // hour offset from simulation start
+}
+
+/**
+ * Generates the list of individual patch windows for the simulation.
+ * Patches are applied in a rolling schedule: every `spread` hours,
+ * `patches` count of new patches go on simultaneously. Each is worn for `worn` hours.
+ */
+export function generatePatchWindows(params: SimulationParams): PatchWindow[] {
+  const { patches, spread, worn, period } = params;
+  const windows: PatchWindow[] = [];
+  let idx = 0;
+
+  for (let t = 0; t < period; t += spread) {
+    for (let p = 0; p < patches; p++) {
+      windows.push({
+        index: idx++,
+        appliedAt: t,
+        removedAt: t + worn,
+      });
+    }
+  }
+
+  return windows;
 }
 
 export interface PatchRecord {
@@ -119,37 +148,28 @@ function getConcentrationAtTime(
 
 /**
  * Calculates E2 concentration over time for a regular schedule simulation.
- * Used for "what-if" mode. Simulates multiple application periods and overlays
- * concentration curves from each patch.
+ * Used for "what-if" mode. Implements the rolling-schedule algorithm matching
+ * the reference simulator (hypothete/e2-patch-simulator): every `spread` hours,
+ * `patches` new patches go on simultaneously; each is worn for `worn` hours.
  */
 export function calculateE2Concentration(
   params: SimulationParams
 ): SeriesData[] {
-  const { patches, spread, worn, period, doseMgPerDay = 0.1 } = params;
-
-  // Scale factor relative to 0.1mg/day baseline
-  const doseFactor = doseMgPerDay / 0.1;
-
-  // Simulate 4 full periods (enough to approach steady-state)
-  const totalPeriods = 4;
-  const totalHours = totalPeriods * period;
+  const { period, doseMgPerDay } = params;
+  const doseFactor = (doseMgPerDay ?? 0.1) / 0.1;
+  const windows = generatePatchWindows(params);
   const results: SeriesData[] = [];
 
-  for (let hour = 0; hour <= totalHours; hour++) {
+  for (let hour = 0; hour <= period; hour++) {
     let totalConcentration = 0;
 
-    for (let periodIdx = 0; periodIdx < totalPeriods; periodIdx++) {
-      const periodStart = periodIdx * period;
+    for (const win of windows) {
+      const timeSinceApplication = hour - win.appliedAt;
+      if (timeSinceApplication < 0) continue;
 
-      for (let patchIdx = 0; patchIdx < patches; patchIdx++) {
-        const applicationTime = periodStart + patchIdx * spread;
-        const timeSinceApplication = hour - applicationTime;
-
-        if (timeSinceApplication < 0) continue;
-
-        totalConcentration +=
-          getConcentrationAtTime(timeSinceApplication, worn) * doseFactor;
-      }
+      const wornHours = win.removedAt - win.appliedAt;
+      totalConcentration +=
+        getConcentrationAtTime(timeSinceApplication, wornHours) * doseFactor;
     }
 
     results.push({
