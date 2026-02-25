@@ -27,9 +27,9 @@ export default function PatchTimeline({ windows, period }: PatchTimelineProps) {
     return <p className="text-xs text-gray-400 text-center py-4">No patches in this schedule.</p>;
   }
 
-  // Only show first 12 patches to avoid overcrowding (later ones repeat the pattern)
-  const visibleRows = rows.slice(0, 12);
-  const hasMore = rows.length > 12;
+  // Only show first 20 patches to avoid overcrowding (later ones repeat the pattern)
+  const visibleRows = rows.slice(0, 20);
+  const hasMore = rows.length > 20;
 
   return (
     <div className="space-y-1">
@@ -59,7 +59,7 @@ export default function PatchTimeline({ windows, period }: PatchTimelineProps) {
       ))}
       {hasMore && (
         <p className="text-[9px] text-gray-400 text-center pt-1">
-          +{rows.length - 12} more patches (pattern repeats)
+          +{rows.length - 20} more patches (pattern repeats)
         </p>
       )}
       {/* Period markers */}

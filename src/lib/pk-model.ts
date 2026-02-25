@@ -153,11 +153,12 @@ function getConcentrationAtTime(
  * `patches` new patches go on simultaneously; each is worn for `worn` hours.
  */
 export function calculateE2Concentration(
-  params: SimulationParams
+  params: SimulationParams,
+  precomputedWindows?: PatchWindow[]
 ): SeriesData[] {
   const { period, doseMgPerDay } = params;
   const doseFactor = (doseMgPerDay ?? 0.1) / 0.1;
-  const windows = generatePatchWindows(params);
+  const windows = precomputedWindows ?? generatePatchWindows(params);
   const results: SeriesData[] = [];
 
   for (let hour = 0; hour <= period; hour++) {

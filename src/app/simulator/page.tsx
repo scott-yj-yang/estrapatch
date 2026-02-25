@@ -137,7 +137,7 @@ export default function SimulatorPage() {
       const params = { patches, spread, worn, period: whatIfPeriod, doseMgPerDay: whatIfDose };
       const newWindows = generatePatchWindows(params);
       setPatchWindows(newWindows);
-      const series = calculateE2Concentration(params);
+      const series = calculateE2Concentration(params, newWindows); // pass pre-computed windows
       setWhatIfData(series);
     } catch (error) {
       console.error("Failed to compute what-if data:", error);
