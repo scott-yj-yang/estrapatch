@@ -45,6 +45,7 @@ const DEFAULT_SETTINGS: Record<string, string> = {
   target_e2_min: "100",
   target_e2_max: "200",
   patches_per_change: "2",
+  default_dose_mg_per_day: "0.1",
 };
 
 export async function ensureDefaults(): Promise<void> {
@@ -53,6 +54,14 @@ export async function ensureDefaults(): Promise<void> {
     await db.settings.bulkPut(
       Object.entries(DEFAULT_SETTINGS).map(([key, value]) => ({ key, value }))
     );
+  } else {
+    // Seed any missing keys for existing users (e.g. newly added settings)
+    for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {
+      const existing = await db.settings.get(key);
+      if (existing === undefined) {
+        await db.settings.put({ key, value });
+      }
+    }
   }
 }
 

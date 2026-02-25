@@ -7,6 +7,8 @@ import SimulatorSlider from "@/components/SimulatorSlider";
 import RecommendationTimeline from "@/components/RecommendationTimeline";
 import PlaygroundSimulator from "@/components/PlaygroundSimulator";
 import Button from "@/components/Button";
+import DoseSelector from "@/components/DoseSelector";
+import FDAReference from "@/components/FDAReference";
 import { PlaygroundPatch } from "@/lib/types";
 import {
   getAllPatches,
@@ -20,7 +22,10 @@ import {
   getCurrentE2Estimate,
   projectE2Forward,
   getRecommendations,
+  generatePatchWindows,
+  PatchWindow,
 } from "@/lib/pk-model";
+import PatchTimeline from "@/components/PatchTimeline";
 
 type Tab = "personal" | "whatif" | "playground";
 
@@ -51,8 +56,12 @@ export default function SimulatorPage() {
   const [patches, setPatches] = useState(2);
   const [spread, setSpread] = useState(84);
   const [worn, setWorn] = useState(84);
+  const [whatIfDose, setWhatIfDose] = useState(0.1);
   const [whatIfData, setWhatIfData] = useState<SeriesPoint[]>([]);
   const [whatIfLoading, setWhatIfLoading] = useState(false);
+  const [showPatches, setShowPatches] = useState(false);
+  const [patchWindows, setPatchWindows] = useState<PatchWindow[]>([]);
+  const [whatIfPeriod] = useState(672); // 28 days, matching reference simulator
 
   const fetchPersonal = useCallback(async () => {
     setPersonalLoading(true);
@@ -125,19 +134,17 @@ export default function SimulatorPage() {
   const fetchWhatIf = useCallback(async () => {
     setWhatIfLoading(true);
     try {
-      const series = calculateE2Concentration({
-        patches,
-        spread,
-        worn,
-        period: 168,
-      });
+      const params = { patches, spread, worn, period: whatIfPeriod, doseMgPerDay: whatIfDose };
+      const newWindows = generatePatchWindows(params);
+      setPatchWindows(newWindows);
+      const series = calculateE2Concentration(params, newWindows); // pass pre-computed windows
       setWhatIfData(series);
     } catch (error) {
       console.error("Failed to compute what-if data:", error);
     } finally {
       setWhatIfLoading(false);
     }
-  }, [patches, spread, worn]);
+  }, [patches, spread, worn, whatIfDose, whatIfPeriod]);
 
   const fetchPlaygroundData = useCallback(async () => {
     setPlaygroundLoading(true);
@@ -331,7 +338,7 @@ export default function SimulatorPage() {
             <Card title="Simulation Parameters">
               <div className="space-y-4">
                 <SimulatorSlider
-                  label="Patches per cycle"
+                  label="Patches per application"
                   value={patches}
                   min={1}
                   max={4}
@@ -356,17 +363,36 @@ export default function SimulatorPage() {
                   onChange={setWorn}
                   formatValue={(v) => `${v}h (${(v / 24).toFixed(1)}d)`}
                 />
+                <div>
+                  <label htmlFor="whatif-dose" className="block text-xs font-semibold text-gray-600 mb-1">
+                    Patch Dose
+                  </label>
+                  <DoseSelector id="whatif-dose" value={whatIfDose} onChange={setWhatIfDose} />
+                </div>
               </div>
             </Card>
 
             <Card title="Simulated E2 Levels">
+              <div className="flex justify-end mb-2">
+                <button
+                  onClick={() => setShowPatches((v) => !v)}
+                  className="text-xs px-3 py-1 rounded-kawaii font-semibold bg-kawaii-rose text-kawaii-pink-dark hover:bg-kawaii-pink/30 transition-all"
+                >
+                  {showPatches ? "Show E2 Levels" : "Show Patches"}
+                </button>
+              </div>
               {whatIfLoading ? (
                 <div className="h-64 flex items-center justify-center text-kawaii-pink-dark animate-pulse">
                   Loading...
                 </div>
+              ) : showPatches ? (
+                <PatchTimeline windows={patchWindows} period={whatIfPeriod} />
               ) : (
-                <E2Chart data={whatIfData} period={168} />
+                <E2Chart data={whatIfData} period={whatIfPeriod} />
               )}
+              <div className="mt-4 pt-4 border-t border-kawaii-pink/20">
+                <FDAReference />
+              </div>
             </Card>
           </div>
         )}
@@ -393,11 +419,11 @@ export default function SimulatorPage() {
         {/* Disclaimer */}
         <Card>
           <p className="text-xs text-gray-400 text-center leading-relaxed">
-            This simulation is based on clinical data from post-menopausal cis
-            women using 0.1mg Mylan transdermal patches on the abdomen. Actual
-            E2 levels vary significantly by individual physiology, placement
-            site, and other factors. This is not medical advice — consult your
-            healthcare provider.
+            This simulation is based on pharmacokinetic data from FDA clinical
+            studies of post-menopausal cisgender women using Mylan/Vivelle-Dot
+            transdermal patches. Actual E2 levels vary significantly by
+            individual physiology, placement site, and other factors. This is
+            not medical advice — consult your healthcare provider.
           </p>
         </Card>
       </div>

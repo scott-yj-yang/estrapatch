@@ -100,7 +100,11 @@ export default function RecommendationTimeline({
                   : "bg-green-50 text-green-700"
               }`}
             >
-              {rec.type === "apply" ? "\uD83D\uDC8A " : "\u270B "}
+              {rec.type === "apply" && rec.urgency === "now"
+                ? "\uD83D\uDC8A "
+                : rec.type === "apply"
+                ? "\u23F3 "
+                : "\u270B "}
               {rec.message}
             </div>
           ))}
