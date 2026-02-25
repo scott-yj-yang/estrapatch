@@ -20,6 +20,7 @@ interface EditFormProps {
     removed_at: string | null;
     scheduled_removal?: string;
     wear_hours?: number | null;
+    notified_removal?: boolean;
   }) => void;
   onCancel: () => void;
 }
@@ -63,6 +64,7 @@ function EditForm({ patch, onSave, onCancel }: EditFormProps) {
       removed_at: removedAt ? new Date(removedAt).toISOString() : null,
       scheduled_removal: scheduledRemoval,
       wear_hours: wearHours,
+      notified_removal: false,
     });
   };
 
@@ -186,6 +188,7 @@ export default function HistoryPage() {
       removed_at: string | null;
       scheduled_removal?: string;
       wear_hours?: number | null;
+      notified_removal?: boolean;
     }
   ) => {
     try {

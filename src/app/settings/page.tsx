@@ -54,8 +54,8 @@ export default function SettingsPage() {
       const text = await file.text();
       const data = JSON.parse(text);
 
-      if (!data.version || !data.patches || !data.settings) {
-        alert("Invalid backup file format.");
+      if (data.version !== 1 || !Array.isArray(data.patches) || typeof data.settings !== "object") {
+        alert("Invalid or unsupported backup file format.");
         return;
       }
 
