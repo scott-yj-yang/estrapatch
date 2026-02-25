@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito } from "next/font/google";
+import NavBar from "@/components/NavBar";
+import NotificationSetup from "@/components/NotificationSetup";
+import ReminderPoller from "@/components/ReminderPoller";
 import "./globals.css";
 
 const nunito = Nunito({
@@ -25,6 +28,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${nunito.variable} font-sans antialiased`}>
         <main className="pb-20">{children}</main>
+        <NavBar />
+        <NotificationSetup />
+        <ReminderPoller />
       </body>
     </html>
   );
