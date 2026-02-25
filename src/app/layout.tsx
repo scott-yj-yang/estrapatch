@@ -13,6 +13,12 @@ const nunito = Nunito({
 export const metadata: Metadata = {
   title: "EstaPatch",
   description: "Track your estradiol patch applications with love",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "EstaPatch",
+  },
 };
 
 export const viewport: Viewport = {
