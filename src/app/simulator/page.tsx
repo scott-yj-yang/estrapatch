@@ -7,6 +7,8 @@ import SimulatorSlider from "@/components/SimulatorSlider";
 import RecommendationTimeline from "@/components/RecommendationTimeline";
 import PlaygroundSimulator from "@/components/PlaygroundSimulator";
 import Button from "@/components/Button";
+import DoseSelector from "@/components/DoseSelector";
+import FDAReference from "@/components/FDAReference";
 import { PlaygroundPatch } from "@/lib/types";
 import {
   getAllPatches,
@@ -51,6 +53,7 @@ export default function SimulatorPage() {
   const [patches, setPatches] = useState(2);
   const [spread, setSpread] = useState(84);
   const [worn, setWorn] = useState(84);
+  const [whatIfDose, setWhatIfDose] = useState(0.1);
   const [whatIfData, setWhatIfData] = useState<SeriesPoint[]>([]);
   const [whatIfLoading, setWhatIfLoading] = useState(false);
 
@@ -130,6 +133,7 @@ export default function SimulatorPage() {
         spread,
         worn,
         period: 168,
+        doseMgPerDay: whatIfDose,
       });
       setWhatIfData(series);
     } catch (error) {
@@ -137,7 +141,7 @@ export default function SimulatorPage() {
     } finally {
       setWhatIfLoading(false);
     }
-  }, [patches, spread, worn]);
+  }, [patches, spread, worn, whatIfDose]);
 
   const fetchPlaygroundData = useCallback(async () => {
     setPlaygroundLoading(true);
@@ -356,6 +360,12 @@ export default function SimulatorPage() {
                   onChange={setWorn}
                   formatValue={(v) => `${v}h (${(v / 24).toFixed(1)}d)`}
                 />
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">
+                    Patch Dose
+                  </label>
+                  <DoseSelector value={whatIfDose} onChange={setWhatIfDose} />
+                </div>
               </div>
             </Card>
 
@@ -367,6 +377,9 @@ export default function SimulatorPage() {
               ) : (
                 <E2Chart data={whatIfData} period={168} />
               )}
+              <div className="mt-4 pt-4 border-t border-kawaii-pink/20">
+                <FDAReference />
+              </div>
             </Card>
           </div>
         )}

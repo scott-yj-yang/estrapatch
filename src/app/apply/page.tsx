@@ -6,7 +6,8 @@ import Card from "@/components/Card";
 import Button from "@/components/Button";
 import BodyMap, { PatchMarker } from "@/components/BodyMap";
 import { BodySide, Patch } from "@/lib/types";
-import { getAllPatches, createPatch } from "@/lib/db";
+import { getAllPatches, createPatch, getSetting, ensureDefaults } from "@/lib/db";
+import DoseSelector from "@/components/DoseSelector";
 
 export default function ApplyPatchPage() {
   const router = useRouter();
@@ -17,11 +18,17 @@ export default function ApplyPatchPage() {
     side: BodySide;
   } | null>(null);
   const [wearDays, setWearDays] = useState(3.5);
+  const [dose, setDose] = useState(0.1);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     async function fetchRecent() {
       try {
+        await ensureDefaults();
+        const defaultDose = await getSetting("default_dose_mg_per_day");
+        if (defaultDose !== null) {
+          setDose(Number(defaultDose));
+        }
         const patches: Patch[] = await getAllPatches();
 
         // Filter patches from the last 30 days
@@ -61,6 +68,7 @@ export default function ApplyPatchPage() {
         body_y: placement.y,
         body_side: placement.side,
         wear_hours: wearDays * 24,
+        dose_mg_per_day: dose,
       });
       router.push("/");
     } catch (error) {
@@ -116,6 +124,14 @@ export default function ApplyPatchPage() {
                 side at ({(placement.x * 100).toFixed(0)}%,{" "}
                 {(placement.y * 100).toFixed(0)}%)
               </p>
+
+              {/* Patch dose */}
+              <div className="bg-kawaii-rose/30 rounded-kawaii p-3">
+                <label className="block text-sm font-semibold text-kawaii-pink-dark mb-2">
+                  Patch Dose
+                </label>
+                <DoseSelector value={dose} onChange={setDose} className="w-full" />
+              </div>
 
               {/* Wear time setting */}
               <div className="bg-kawaii-rose/30 rounded-kawaii p-3">

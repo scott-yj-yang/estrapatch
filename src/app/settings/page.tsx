@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Card from "@/components/Card";
 import Button from "@/components/Button";
+import DoseSelector from "@/components/DoseSelector";
 import {
   getAllSettings,
   setSetting,
@@ -170,6 +171,22 @@ export default function SettingsPage() {
             </div>
             <p className="text-xs text-gray-400">
               Default wear time for new patch applications.
+            </p>
+          </div>
+        </Card>
+
+        {/* Default Dose */}
+        <Card title="Default Dose">
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold text-gray-600 mb-1">
+              Dose per patch
+            </label>
+            <DoseSelector
+              value={Number(settings.default_dose_mg_per_day ?? "0.1")}
+              onChange={(dose) => handleSave("default_dose_mg_per_day", String(dose))}
+            />
+            <p className="text-xs text-gray-400">
+              Default dose when applying new patches.
             </p>
           </div>
         </Card>

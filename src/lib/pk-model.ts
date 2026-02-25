@@ -8,6 +8,7 @@ export interface SimulationParams {
   spread: number; // Hours between patch applications within a period
   worn: number; // How long each patch is worn (hours)
   period: number; // Hours between application periods (e.g. 84 for 3.5 days)
+  doseMgPerDay?: number; // Dose per patch in mg/day (default: 0.1)
 }
 
 export interface PatchRecord {
@@ -124,7 +125,10 @@ function getConcentrationAtTime(
 export function calculateE2Concentration(
   params: SimulationParams
 ): SeriesData[] {
-  const { patches, spread, worn, period } = params;
+  const { patches, spread, worn, period, doseMgPerDay = 0.1 } = params;
+
+  // Scale factor relative to 0.1mg/day baseline
+  const doseFactor = doseMgPerDay / 0.1;
 
   // Simulate 4 full periods (enough to approach steady-state)
   const totalPeriods = 4;
@@ -143,10 +147,8 @@ export function calculateE2Concentration(
 
         if (timeSinceApplication < 0) continue;
 
-        totalConcentration += getConcentrationAtTime(
-          timeSinceApplication,
-          worn
-        );
+        totalConcentration +=
+          getConcentrationAtTime(timeSinceApplication, worn) * doseFactor;
       }
     }
 
