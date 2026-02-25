@@ -406,11 +406,11 @@ export default function SimulatorPage() {
         {/* Disclaimer */}
         <Card>
           <p className="text-xs text-gray-400 text-center leading-relaxed">
-            This simulation is based on clinical data from post-menopausal cis
-            women using 0.1mg Mylan transdermal patches on the abdomen. Actual
-            E2 levels vary significantly by individual physiology, placement
-            site, and other factors. This is not medical advice — consult your
-            healthcare provider.
+            This simulation is based on pharmacokinetic data from FDA clinical
+            studies of post-menopausal cisgender women using Mylan/Vivelle-Dot
+            transdermal patches. Actual E2 levels vary significantly by
+            individual physiology, placement site, and other factors. This is
+            not medical advice — consult your healthcare provider.
           </p>
         </Card>
       </div>

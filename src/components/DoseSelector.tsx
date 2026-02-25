@@ -12,13 +12,20 @@ interface DoseSelectorProps {
   value: number;
   onChange: (dose: number) => void;
   className?: string;
+  id?: string;
+  "aria-label"?: string;
 }
 
-export default function DoseSelector({ value, onChange, className }: DoseSelectorProps) {
+export default function DoseSelector({ value, onChange, className, id, "aria-label": ariaLabel }: DoseSelectorProps) {
   return (
     <select
+      id={id}
+      aria-label={ariaLabel}
       value={value}
-      onChange={(e) => onChange(Number(e.target.value))}
+      onChange={(e) => {
+        const v = Number(e.target.value);
+        if (!isNaN(v)) onChange(v);
+      }}
       className={`px-3 py-2 rounded-kawaii border border-kawaii-pink/30 text-sm focus:outline-none focus:ring-2 focus:ring-kawaii-pink-dark/30 bg-white ${className ?? ""}`}
     >
       {DOSE_OPTIONS.map((opt) => (
