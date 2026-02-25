@@ -368,7 +368,10 @@ export function getRecommendations(
 
   // Detect whether E2 is currently rising (compare now vs. 4h from now)
   const levelIn4h = projection.find(p => p.time >= 4)?.value ?? currentLevel;
-  const isRising = levelIn4h > currentLevel + 2; // rising by more than 2 pg/mL in 4h
+  // Minimum net rise over 4h to confirm a patch is actively ramping up.
+  // Far below the typical 4h ramp rate (~8-34 pg/mL) but above rounding noise.
+  const RISING_THRESHOLD_PG_ML = 2;
+  const isRising = levelIn4h > currentLevel + RISING_THRESHOLD_PG_ML; // rising by more than 2 pg/mL in 4h
 
   // Check if currently out of range
   if (currentLevel < targetMin) {
@@ -385,8 +388,8 @@ export function getRecommendations(
       // Currently rising toward target — don't recommend applying
       recommendations.push({
         type: "apply",
-        urgency: enterRangeHour <= 8 ? "soon" : "upcoming",
-        message: `E2 is rising (${currentLevel.toFixed(0)} pg/mL). Expected to reach target in ~${Math.round(enterRangeHour)}h.`,
+        urgency: enterRangeHour <= 6 ? "soon" : "upcoming",
+        message: `E2 is rising (${currentLevel.toFixed(0)} pg/mL) — no action needed. Expected to reach target in ~${Math.round(enterRangeHour)}h.`,
         hoursUntil: enterRangeHour,
       });
     } else if (isRising) {
