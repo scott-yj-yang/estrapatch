@@ -7,6 +7,7 @@ import Button from "@/components/Button";
 import ActivePatchCard from "@/components/ActivePatchCard";
 import MiniE2Chart from "@/components/MiniE2Chart";
 import RecommendationTimeline from "@/components/RecommendationTimeline";
+import WelcomeScreen from "@/components/WelcomeScreen";
 import { Patch, BodySide } from "@/lib/types";
 import {
   getActivePatches,
@@ -36,9 +37,18 @@ export default function Dashboard() {
   const [activePatches, setActivePatches] = useState<Patch[]>([]);
   const [simulatorData, setSimulatorData] = useState<SimulatorData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showWelcome, setShowWelcome] = useState<boolean | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
+      const onboarded = await getSetting("onboarding_complete");
+      if (onboarded !== "true") {
+        setShowWelcome(true);
+        setLoading(false);
+        return;
+      }
+      setShowWelcome(false);
+
       await ensureDefaults();
 
       const active = await getActivePatches();
@@ -125,6 +135,17 @@ export default function Dashboard() {
       console.error("Failed to adjust patch:", error);
     }
   };
+
+  if (showWelcome === true) {
+    return (
+      <WelcomeScreen
+        onComplete={() => {
+          setShowWelcome(false);
+          fetchData();
+        }}
+      />
+    );
+  }
 
   if (loading) {
     return (
