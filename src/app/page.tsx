@@ -1,65 +1,217 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import Card from "@/components/Card";
+import Button from "@/components/Button";
+import ActivePatchCard from "@/components/ActivePatchCard";
+import MiniE2Chart from "@/components/MiniE2Chart";
+import RecommendationTimeline from "@/components/RecommendationTimeline";
+import { Patch, BodySide } from "@/lib/types";
+import {
+  getActivePatches,
+  getAllPatches,
+  updatePatch,
+  removePatch as dbRemovePatch,
+  getSetting,
+  ensureDefaults,
+} from "@/lib/db";
+import {
+  calculatePersonalizedE2,
+  getCurrentE2Estimate,
+  projectE2Forward,
+  getRecommendations,
+} from "@/lib/pk-model";
+
+interface SimulatorData {
+  series: { time: number; value: number }[];
+  currentLevel: number;
+  projection: { time: number; value: number }[];
+  targetMin: number;
+  targetMax: number;
+  recommendations: { type: "apply" | "remove"; urgency: "now" | "soon" | "upcoming"; message: string; hoursUntil: number }[];
+}
+
+export default function Dashboard() {
+  const [activePatches, setActivePatches] = useState<Patch[]>([]);
+  const [simulatorData, setSimulatorData] = useState<SimulatorData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = useCallback(async () => {
+    try {
+      await ensureDefaults();
+
+      const active = await getActivePatches();
+      setActivePatches(active);
+
+      // Run PK simulation client-side
+      const allPatches = await getAllPatches();
+      const patchRecords = allPatches.map((p) => ({
+        applied_at: p.applied_at,
+        removed_at: p.removed_at,
+        dose_mg_per_day: p.dose_mg_per_day,
+      }));
+
+      if (patchRecords.length > 0) {
+        const series = calculatePersonalizedE2(patchRecords, 672);
+        const currentLevel = getCurrentE2Estimate(patchRecords);
+        const projection = projectE2Forward(patchRecords, 48);
+        const tMin = Number((await getSetting("target_e2_min")) ?? "100");
+        const tMax = Number((await getSetting("target_e2_max")) ?? "200");
+        const recommendations = getRecommendations(patchRecords, tMin, tMax, 72);
+
+        setSimulatorData({
+          series,
+          currentLevel,
+          projection,
+          targetMin: tMin,
+          targetMax: tMax,
+          recommendations,
+        });
+      } else {
+        setSimulatorData(null);
+      }
+    } catch (error) {
+      console.error("Failed to fetch dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleRemove = async (id: number) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to mark this patch as removed?"
+    );
+    if (!confirmed) return;
+
+    try {
+      await dbRemovePatch(id);
+      await fetchData();
+    } catch (error) {
+      console.error("Failed to remove patch:", error);
+    }
+  };
+
+  const handleEditLocation = async (id: number, x: number, y: number, side: BodySide) => {
+    try {
+      await updatePatch(id, { body_x: x, body_y: y, body_side: side });
+      await fetchData();
+    } catch (error) {
+      console.error("Failed to update patch location:", error);
+    }
+  };
+
+  const handleAdjust = async (id: number, wearHours: number) => {
+    try {
+      // Find the patch to compute new scheduled_removal from its applied_at
+      const patch = activePatches.find((p) => p.id === id);
+      if (!patch) return;
+
+      const scheduledRemoval = new Date(
+        new Date(patch.applied_at).getTime() + wearHours * 60 * 60 * 1000
+      ).toISOString();
+
+      await updatePatch(id, {
+        wear_hours: wearHours,
+        scheduled_removal: scheduledRemoval,
+        notified_removal: false,
+      });
+      await fetchData();
+    } catch (error) {
+      console.error("Failed to adjust patch:", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-kawaii-cream flex items-center justify-center">
+        <div className="text-kawaii-pink-dark font-semibold text-lg animate-pulse">
+          Loading...
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-kawaii-cream">
+      <div className="max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto px-4 py-6 space-y-4">
+        <h1 className="text-2xl font-bold text-kawaii-pink-dark text-center">
+          EstaPatch
+        </h1>
+
+        <div className="md:grid md:grid-cols-2 md:gap-4 space-y-4 md:space-y-0">
+          {/* Active Patches */}
+          <Card title={`Active Patches (${activePatches.length})`}>
+            {activePatches.length === 0 ? (
+              <p className="text-gray-400 text-center py-4">
+                No active patches. Time to apply one?
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {activePatches.map((patch) => (
+                  <ActivePatchCard
+                    key={patch.id}
+                    patch={patch}
+                    onRemove={handleRemove}
+                    onAdjust={handleAdjust}
+                    onEditLocation={handleEditLocation}
+                  />
+                ))}
+              </div>
+            )}
+          </Card>
+
+          {/* Estimated E2 Level */}
+          <Card title="Estimated E2 Level">
+            {simulatorData && simulatorData.series.length > 0 ? (
+              <div className="space-y-2">
+                <MiniE2Chart
+                  data={simulatorData.series}
+                  currentLevel={simulatorData.currentLevel}
+                  projection={simulatorData.projection}
+                  targetMin={simulatorData.targetMin}
+                  targetMax={simulatorData.targetMax}
+                />
+                <div className="text-center">
+                  <Link
+                    href="/simulator"
+                    className="text-sm text-kawaii-pink-dark font-semibold hover:underline"
+                  >
+                    View Full Simulator →
+                  </Link>
+                </div>
+                {simulatorData.recommendations && simulatorData.recommendations.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-kawaii-pink/20">
+                    <RecommendationTimeline
+                      projection={simulatorData.projection}
+                      targetMin={simulatorData.targetMin}
+                      targetMax={simulatorData.targetMax}
+                      recommendations={simulatorData.recommendations}
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-gray-400 text-center py-4">
+                No data yet. Apply a patch to see your estimated levels.
+              </p>
+            )}
+          </Card>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Quick Action */}
+        <div className="flex justify-center">
+          <Link href="/apply">
+            <Button variant="primary" size="lg">
+              Apply New Patch
+            </Button>
+          </Link>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
