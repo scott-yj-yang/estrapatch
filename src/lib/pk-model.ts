@@ -366,14 +366,46 @@ export function getRecommendations(
   const recommendations: Recommendation[] = [];
   const currentLevel = projection[0]?.value ?? 0;
 
+  // Detect whether E2 is currently rising (compare now vs. 4h from now)
+  const levelIn4h = projection.find(p => p.time >= 4)?.value ?? currentLevel;
+  const isRising = levelIn4h > currentLevel + 2; // rising by more than 2 pg/mL in 4h
+
   // Check if currently out of range
   if (currentLevel < targetMin) {
-    recommendations.push({
-      type: "apply",
-      urgency: "now",
-      message: `E2 is below target (${currentLevel.toFixed(0)} pg/mL). Apply a new patch now.`,
-      hoursUntil: 0,
-    });
+    // Find when (if ever) E2 will reach targetMin within the projection window
+    let enterRangeHour: number | null = null;
+    for (const point of projection) {
+      if (point.value >= targetMin) {
+        enterRangeHour = point.time;
+        break;
+      }
+    }
+
+    if (isRising && enterRangeHour !== null) {
+      // Currently rising toward target — don't recommend applying
+      recommendations.push({
+        type: "apply",
+        urgency: enterRangeHour <= 8 ? "soon" : "upcoming",
+        message: `E2 is rising (${currentLevel.toFixed(0)} pg/mL). Expected to reach target in ~${Math.round(enterRangeHour)}h.`,
+        hoursUntil: enterRangeHour,
+      });
+    } else if (isRising) {
+      // Rising but won't hit target in projection window
+      recommendations.push({
+        type: "apply",
+        urgency: "upcoming",
+        message: `E2 is rising (${currentLevel.toFixed(0)} pg/mL) but may not reach target range. Consider an additional patch.`,
+        hoursUntil: 0,
+      });
+    } else {
+      // Not rising — genuinely needs a new patch
+      recommendations.push({
+        type: "apply",
+        urgency: "now",
+        message: `E2 is below target (${currentLevel.toFixed(0)} pg/mL). Apply a new patch now.`,
+        hoursUntil: 0,
+      });
+    }
   } else if (currentLevel > targetMax) {
     recommendations.push({
       type: "remove",
