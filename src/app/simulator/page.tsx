@@ -425,6 +425,17 @@ export default function SimulatorPage() {
             individual physiology, placement site, and other factors. This is
             not medical advice — consult your healthcare provider.
           </p>
+          <p className="text-sm text-gray-500 text-center mt-3 pt-3 border-t border-kawaii-pink/20">
+            Simulator inspired by{" "}
+            <a
+              href="https://github.com/hypothete/e2-patch-simulator"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-kawaii-pink hover:text-kawaii-pink-dark underline font-medium"
+            >
+              hypothete/e2-patch-simulator
+            </a>
+          </p>
         </Card>
       </div>
     </div>
