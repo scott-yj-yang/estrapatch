@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Card from "@/components/Card";
 import E2Chart, { PatchEvent } from "@/components/E2Chart";
 import SimulatorSlider from "@/components/SimulatorSlider";
-import RecommendationTimeline from "@/components/RecommendationTimeline";
+import ScheduleTimeline from "@/components/ScheduleTimeline";
 import PlaygroundSimulator from "@/components/PlaygroundSimulator";
 import Button from "@/components/Button";
 import DoseSelector from "@/components/DoseSelector";
@@ -21,7 +21,7 @@ import {
   calculateE2Concentration,
   getCurrentE2Estimate,
   projectE2Forward,
-  getRecommendations,
+  getScheduleNotes,
   generatePatchWindows,
   PatchWindow,
 } from "@/lib/pk-model";
@@ -45,7 +45,7 @@ export default function SimulatorPage() {
   const [projection, setProjection] = useState<SeriesPoint[]>([]);
   const [targetMin, setTargetMin] = useState<number>(100);
   const [targetMax, setTargetMax] = useState<number>(200);
-  const [recommendations, setRecommendations] = useState<{ type: "apply" | "remove"; urgency: "now" | "soon" | "upcoming"; message: string; hoursUntil: number }[]>([]);
+  const [scheduleNotes, setScheduleNotes] = useState<{ type: "apply" | "remove"; urgency: "now" | "soon" | "upcoming"; message: string; hoursUntil: number }[]>([]);
   const [personalLoading, setPersonalLoading] = useState(false);
 
   // Playground tab state
@@ -79,7 +79,7 @@ export default function SimulatorPage() {
       const proj = projectE2Forward(patchRecords, 48);
       const tMin = Number((await getSetting("target_e2_min")) ?? "100");
       const tMax = Number((await getSetting("target_e2_max")) ?? "200");
-      const recs = getRecommendations(patchRecords, tMin, tMax, 72);
+      const recs = getScheduleNotes(patchRecords, tMin, tMax, 72);
 
       // Compute startTime and patchEvents
       let startTimeVal: string | null = null;
@@ -123,7 +123,7 @@ export default function SimulatorPage() {
       setProjection(proj);
       setTargetMin(tMin);
       setTargetMax(tMax);
-      setRecommendations(recs);
+      setScheduleNotes(recs);
     } catch (error) {
       console.error("Failed to compute personal data:", error);
     } finally {
@@ -265,13 +265,13 @@ export default function SimulatorPage() {
                   targetMax={targetMax}
                 />
               )}
-              {recommendations.length > 0 && (
+              {scheduleNotes.length > 0 && (
                 <div className="mt-4">
-                  <RecommendationTimeline
+                  <ScheduleTimeline
                     projection={projection}
                     targetMin={targetMin}
                     targetMax={targetMax}
-                    recommendations={recommendations}
+                    scheduleNotes={scheduleNotes}
                   />
                 </div>
               )}

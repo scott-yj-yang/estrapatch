@@ -2,10 +2,10 @@
 
 import { useMemo } from "react";
 import type { PlaygroundPatch } from "@/lib/types";
-import type { SeriesData, PatchRecord, Recommendation } from "@/lib/pk-model";
+import type { SeriesData, PatchRecord, ScheduleNote } from "@/lib/pk-model";
 import {
   calculatePersonalizedE2,
-  getRecommendations,
+  getScheduleNotes,
 } from "@/lib/pk-model";
 
 export interface PatchEvent {
@@ -21,7 +21,7 @@ export interface PlaygroundSimulationResult {
   startTime: string;
   currentLevel: number;
   patchEvents: PatchEvent[];
-  recommendations: Recommendation[];
+  scheduleNotes: ScheduleNote[];
 }
 
 const PROJECTION_HOURS = 168; // 7 days
@@ -110,8 +110,8 @@ export function usePlaygroundSimulation(
     // Sort events chronologically
     patchEvents.sort((a, b) => a.hour - b.hour);
 
-    // Get recommendations with 168h projection
-    const recommendations = getRecommendations(
+    // Get scheduleNotes with 168h projection
+    const scheduleNotes = getScheduleNotes(
       patchRecords,
       targetMin,
       targetMax,
@@ -124,7 +124,7 @@ export function usePlaygroundSimulation(
       startTime,
       currentLevel,
       patchEvents,
-      recommendations,
+      scheduleNotes,
     };
   }, [patches, targetMin, targetMax]);
 }

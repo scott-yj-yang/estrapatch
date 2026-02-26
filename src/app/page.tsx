@@ -6,7 +6,7 @@ import Card from "@/components/Card";
 import Button from "@/components/Button";
 import ActivePatchCard from "@/components/ActivePatchCard";
 import MiniE2Chart from "@/components/MiniE2Chart";
-import RecommendationTimeline from "@/components/RecommendationTimeline";
+import ScheduleTimeline from "@/components/ScheduleTimeline";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import { Patch, BodySide } from "@/lib/types";
 import {
@@ -21,7 +21,7 @@ import {
   calculatePersonalizedE2,
   getCurrentE2Estimate,
   projectE2Forward,
-  getRecommendations,
+  getScheduleNotes,
 } from "@/lib/pk-model";
 
 interface SimulatorData {
@@ -30,7 +30,7 @@ interface SimulatorData {
   projection: { time: number; value: number }[];
   targetMin: number;
   targetMax: number;
-  recommendations: { type: "apply" | "remove"; urgency: "now" | "soon" | "upcoming"; message: string; hoursUntil: number }[];
+  scheduleNotes: { type: "apply" | "remove"; urgency: "now" | "soon" | "upcoming"; message: string; hoursUntil: number }[];
 }
 
 export default function Dashboard() {
@@ -68,7 +68,7 @@ export default function Dashboard() {
         const projection = projectE2Forward(patchRecords, 48);
         const tMin = Number((await getSetting("target_e2_min")) ?? "100");
         const tMax = Number((await getSetting("target_e2_max")) ?? "200");
-        const recommendations = getRecommendations(patchRecords, tMin, tMax, 72);
+        const scheduleNotes = getScheduleNotes(patchRecords, tMin, tMax, 72);
 
         setSimulatorData({
           series,
@@ -76,7 +76,7 @@ export default function Dashboard() {
           projection,
           targetMin: tMin,
           targetMax: tMax,
-          recommendations,
+          scheduleNotes,
         });
       } else {
         setSimulatorData(null);
@@ -205,13 +205,13 @@ export default function Dashboard() {
                     View Full Simulator →
                   </Link>
                 </div>
-                {simulatorData.recommendations && simulatorData.recommendations.length > 0 && (
+                {simulatorData.scheduleNotes && simulatorData.scheduleNotes.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-kawaii-pink/20">
-                    <RecommendationTimeline
+                    <ScheduleTimeline
                       projection={simulatorData.projection}
                       targetMin={simulatorData.targetMin}
                       targetMax={simulatorData.targetMax}
-                      recommendations={simulatorData.recommendations}
+                      scheduleNotes={simulatorData.scheduleNotes}
                     />
                   </div>
                 )}

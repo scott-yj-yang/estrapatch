@@ -1,25 +1,25 @@
 "use client";
 
-import { Recommendation } from "@/lib/pk-model";
+import { ScheduleNote } from "@/lib/pk-model";
 
 interface TimelineBlock {
   hour: number;
   status: "in-range" | "warning" | "out-of-range";
 }
 
-interface RecommendationTimelineProps {
+interface ScheduleTimelineProps {
   projection: { time: number; value: number }[];
   targetMin: number;
   targetMax: number;
-  recommendations: Recommendation[];
+  scheduleNotes: ScheduleNote[];
 }
 
-export default function RecommendationTimeline({
+export default function ScheduleTimeline({
   projection,
   targetMin,
   targetMax,
-  recommendations,
-}: RecommendationTimelineProps) {
+  scheduleNotes,
+}: ScheduleTimelineProps) {
   if (projection.length === 0) return null;
 
   const totalHours = Math.min(projection[projection.length - 1].time, 72);
@@ -86,10 +86,10 @@ export default function RecommendationTimeline({
         </div>
       </div>
 
-      {/* Recommendations */}
-      {recommendations.length > 0 && (
+      {/* ScheduleNotes */}
+      {scheduleNotes.length > 0 && (
         <div className="space-y-1.5">
-          {recommendations.map((rec, i) => (
+          {scheduleNotes.map((rec, i) => (
             <div
               key={i}
               className={`text-sm px-3 py-2 rounded-kawaii ${

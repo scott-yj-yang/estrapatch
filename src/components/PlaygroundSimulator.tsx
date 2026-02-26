@@ -6,7 +6,7 @@ import { usePlaygroundSimulation } from "@/hooks/usePlaygroundSimulation";
 import PlaygroundChart from "@/components/PlaygroundChart";
 import PlaygroundPatchList from "@/components/PlaygroundPatchList";
 import PatchRemovalDialog from "@/components/PatchRemovalDialog";
-import RecommendationTimeline from "@/components/RecommendationTimeline";
+import ScheduleTimeline from "@/components/ScheduleTimeline";
 import Card from "@/components/Card";
 
 interface PlaygroundSimulatorProps {
@@ -187,7 +187,7 @@ export default function PlaygroundSimulator({
     setPatches(initialPatches);
   }, [initialPatches]);
 
-  // --- Projection data for RecommendationTimeline ---
+  // --- Projection data for ScheduleTimeline ---
   const projectionForTimeline = simulation
     ? simulation.series
         .filter((s) => s.time >= simulation.nowHour)
@@ -270,13 +270,13 @@ export default function PlaygroundSimulator({
         </Card>
       </div>
 
-      {/* Health bar / Recommendation Timeline: full width */}
+      {/* Health bar / Schedule Timeline: full width */}
       <Card title="7-Day Projection">
-        <RecommendationTimeline
+        <ScheduleTimeline
           projection={projectionForTimeline}
           targetMin={targetMin}
           targetMax={targetMax}
-          recommendations={simulation.recommendations}
+          scheduleNotes={simulation.scheduleNotes}
         />
       </Card>
 

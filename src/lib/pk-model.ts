@@ -364,7 +364,7 @@ export function projectE2Forward(
   return results;
 }
 
-export interface Recommendation {
+export interface ScheduleNote {
   type: "apply" | "remove";
   urgency: "now" | "soon" | "upcoming";
   message: string;
@@ -372,19 +372,19 @@ export interface Recommendation {
 }
 
 /**
- * Generates recommendations based on projected E2 levels vs. target range.
- * Analyzes the forward projection and suggests when to apply/remove patches.
+ * Generates schedule notes based on projected E2 levels vs. target range.
+ * Analyzes the forward projection and notes when patches may need attention.
  */
-export function getRecommendations(
+export function getScheduleNotes(
   patchRecords: PatchRecord[],
   targetMin: number,
   targetMax: number,
   projectionHours: number = 72
-): Recommendation[] {
+): ScheduleNote[] {
   const projection = projectE2Forward(patchRecords, projectionHours);
   if (projection.length === 0) return [];
 
-  const recommendations: Recommendation[] = [];
+  const scheduleNotes: ScheduleNote[] = [];
   const currentLevel = projection[0]?.value ?? 0;
 
   // Detect whether E2 is currently rising (compare now vs. 4h from now)
@@ -407,7 +407,7 @@ export function getRecommendations(
 
     if (isRising && enterRangeHour !== null) {
       // Currently rising toward target — don't recommend applying
-      recommendations.push({
+      scheduleNotes.push({
         type: "apply",
         urgency: enterRangeHour <= 6 ? "soon" : "upcoming",
         message: `E2 is rising (${currentLevel.toFixed(0)} pg/mL) — no action needed. Expected to reach target in ~${Math.round(enterRangeHour)}h.`,
@@ -415,23 +415,23 @@ export function getRecommendations(
       });
     } else if (isRising) {
       // Rising but won't hit target in projection window
-      recommendations.push({
+      scheduleNotes.push({
         type: "apply",
         urgency: "upcoming",
         message: `E2 is rising (${currentLevel.toFixed(0)} pg/mL) but may not reach target range. Consider an additional patch.`,
         hoursUntil: 0,
       });
     } else {
-      // Not rising — genuinely needs a new patch
-      recommendations.push({
+      // Not rising — may need a new patch
+      scheduleNotes.push({
         type: "apply",
         urgency: "now",
-        message: `E2 is below target (${currentLevel.toFixed(0)} pg/mL). Apply a new patch now.`,
+        message: `E2 is below target (${currentLevel.toFixed(0)} pg/mL). A new patch may be needed.`,
         hoursUntil: 0,
       });
     }
   } else if (currentLevel > targetMax) {
-    recommendations.push({
+    scheduleNotes.push({
       type: "remove",
       urgency: "now",
       message: `E2 is above target (${currentLevel.toFixed(0)} pg/mL). Consider removing a patch.`,
@@ -450,10 +450,10 @@ export function getRecommendations(
 
   if (dropBelowHour !== null && currentLevel >= targetMin) {
     const urgency = dropBelowHour <= 6 ? "soon" : "upcoming";
-    recommendations.push({
+    scheduleNotes.push({
       type: "apply",
       urgency,
-      message: `Apply a new patch in ~${Math.round(dropBelowHour)}h to stay in range.`,
+      message: `E2 may drop below target in ~${Math.round(dropBelowHour)}h.`,
       hoursUntil: dropBelowHour,
     });
   }
@@ -469,7 +469,7 @@ export function getRecommendations(
 
   if (exceedMaxHour !== null && currentLevel <= targetMax) {
     const urgency = exceedMaxHour <= 6 ? "soon" : "upcoming";
-    recommendations.push({
+    scheduleNotes.push({
       type: "remove",
       urgency,
       message: `Consider removing a patch in ~${Math.round(exceedMaxHour)}h to stay in range.`,
@@ -477,5 +477,5 @@ export function getRecommendations(
     });
   }
 
-  return recommendations;
+  return scheduleNotes;
 }
