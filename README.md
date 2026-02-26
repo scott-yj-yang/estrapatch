@@ -47,6 +47,10 @@ Have an idea for a new feature or found a bug? Please [open an issue](https://gi
 
 The pharmacokinetic simulator in estrapatch was inspired by and builds upon the work of [hypothete/e2-patch-simulator](https://github.com/hypothete/e2-patch-simulator) by [@hypothete](https://github.com/hypothete). Their open-source E2 patch simulator provided the foundational algorithm for the rolling-schedule superposition model used here. Thank you for making this work available to the community.
 
+## Terms of Use
+
+See [TERMS_OF_USE.md](TERMS_OF_USE.md) for the full terms. In short: estrapatch is not a medical device, comes with no warranty, and you use it at your own risk.
+
 ## License
 
 This project is open source. See the repository for license details.

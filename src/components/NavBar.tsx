@@ -34,6 +34,13 @@ export default function NavBar() {
         >
           Request a Feature
         </a>
+        <span className="text-gray-300">·</span>
+        <Link
+          href="/terms"
+          className="text-kawaii-pink hover:text-kawaii-pink-dark underline"
+        >
+          Terms
+        </Link>
       </div>
       <div className="flex justify-around items-center h-14 max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto">
         {navItems.map((item) => {

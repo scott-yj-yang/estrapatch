@@ -51,6 +51,13 @@ export default function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
         <Button variant="primary" size="lg" onClick={handleGetStarted}>
           I Understand — Get Started
         </Button>
+        <p className="text-xs text-gray-400">
+          By continuing, you agree to our{" "}
+          <a href="/terms" className="text-kawaii-pink hover:text-kawaii-pink-dark underline">
+            Terms of Use
+          </a>
+          .
+        </p>
       </div>
     </div>
   );
