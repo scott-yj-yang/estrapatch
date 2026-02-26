@@ -28,12 +28,19 @@ export default function MiniBodyMap({ x, y, side, size = 80 }: MiniBodyMapProps)
   const viewH = 400;
   const dotR = 10;
 
+  // Square crop centered on the patch location
+  const cropSize = 120;
+  const cx = x * viewW;
+  const cy = y * viewH;
+  const cropX = Math.max(0, Math.min(cx - cropSize / 2, viewW - cropSize));
+  const cropY = Math.max(0, Math.min(cy - cropSize / 2, viewH - cropSize));
+
   return (
     <div className="flex flex-col items-center gap-0.5">
       <svg
-        viewBox={`0 0 ${viewW} ${viewH}`}
+        viewBox={`${cropX} ${cropY} ${cropSize} ${cropSize}`}
         width={size}
-        height={size * (viewH / viewW)}
+        height={size}
         className="rounded-lg bg-white/50"
       >
         <image
@@ -48,8 +55,8 @@ export default function MiniBodyMap({ x, y, side, size = 80 }: MiniBodyMapProps)
         />
         {/* Patch dot */}
         <circle
-          cx={x * viewW}
-          cy={y * viewH}
+          cx={cx}
+          cy={cy}
           r={dotR}
           fill={COLOR_MAP[side]}
           stroke="white"

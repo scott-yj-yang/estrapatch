@@ -161,7 +161,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-kawaii-cream">
       <div className="max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto px-4 py-6 space-y-4">
         <h1 className="text-2xl font-bold text-kawaii-pink-dark text-center">
-          EstaPatch
+          estrapatch
         </h1>
 
         <div className="md:grid md:grid-cols-2 md:gap-4 space-y-4 md:space-y-0">

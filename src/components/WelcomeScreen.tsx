@@ -19,7 +19,7 @@ export default function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
       <div className="max-w-md w-full text-center space-y-6 animate-bounce-in">
         <div className="text-6xl">&#x1F48A;</div>
         <h1 className="text-3xl font-bold text-kawaii-pink-dark">
-          Welcome to EstaPatch
+          Welcome to estrapatch
         </h1>
         <p className="text-gray-600 leading-relaxed">
           Track your estradiol patch applications, simulate serum E2 levels
@@ -34,7 +34,7 @@ export default function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
             Important Disclaimer
           </p>
           <p className="text-xs text-amber-700 leading-relaxed">
-            EstaPatch is provided for <strong>informational and educational purposes only</strong>.
+            estrapatch is provided for <strong>informational and educational purposes only</strong>.
             It is not a medical device and does not provide medical advice, diagnosis, or treatment.
           </p>
           <p className="text-xs text-amber-700 leading-relaxed">

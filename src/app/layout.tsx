@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import NavBar from "@/components/NavBar";
 import NotificationSetup from "@/components/NotificationSetup";
 import ReminderPoller from "@/components/ReminderPoller";
@@ -11,13 +12,13 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "EstaPatch",
+  title: "estrapatch",
   description: "Track your estradiol patch applications with love",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "EstaPatch",
+    title: "estrapatch",
   },
 };
 
@@ -37,13 +38,14 @@ export default function RootLayout({
           {children}
           <footer className="text-center py-3 px-4 border-t border-kawaii-pink/20">
             <p className="text-[10px] text-gray-400 leading-snug max-w-lg mx-auto">
-              EstaPatch is not a medical device. Estimates are for informational and educational purposes only. Use at your own risk.
+              estrapatch is not a medical device. Estimates are for informational and educational purposes only. Use at your own risk.
             </p>
           </footer>
         </main>
         <NavBar />
         <NotificationSetup />
         <ReminderPoller />
+        <Analytics />
       </body>
     </html>
   );
