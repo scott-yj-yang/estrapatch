@@ -53,4 +53,4 @@ See [TERMS_OF_USE.md](TERMS_OF_USE.md) for the full terms. In short: estrapatch 
 
 ## License
 
-This project is open source. See the repository for license details.
+This project is licensed under the [Apache License 2.0](LICENSE).
