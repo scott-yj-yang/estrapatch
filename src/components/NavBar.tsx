@@ -16,7 +16,26 @@ export default function NavBar() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-      <div className="flex justify-around items-center h-16 max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto">
+      <div className="flex justify-center gap-3 pt-1.5 pb-0.5 text-[11px] font-medium">
+        <a
+          href="https://github.com/scott-yj-yang/estrapatch"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-kawaii-pink hover:text-kawaii-pink-dark underline"
+        >
+          GitHub
+        </a>
+        <span className="text-gray-300">·</span>
+        <a
+          href="https://github.com/scott-yj-yang/estrapatch/issues"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-kawaii-pink hover:text-kawaii-pink-dark underline"
+        >
+          Request a Feature
+        </a>
+      </div>
+      <div className="flex justify-around items-center h-14 max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
 

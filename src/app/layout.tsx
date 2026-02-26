@@ -36,26 +36,7 @@ export default function RootLayout({
       <body className={`${nunito.variable} font-sans antialiased`}>
         <main className="pb-20">
           {children}
-          <footer className="text-center py-4 px-4 mb-4 border-t border-kawaii-pink/20 space-y-3">
-            <p className="text-xs text-gray-500 font-medium">
-              <a
-                href="https://github.com/scott-yj-yang/estrapatch"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-kawaii-pink hover:text-kawaii-pink-dark underline"
-              >
-                GitHub
-              </a>
-              {" · "}
-              <a
-                href="https://github.com/scott-yj-yang/estrapatch/issues"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-kawaii-pink hover:text-kawaii-pink-dark underline"
-              >
-                Request a Feature
-              </a>
-            </p>
+          <footer className="text-center py-3 px-4 border-t border-kawaii-pink/20">
             <p className="text-[10px] text-gray-400 leading-snug max-w-lg mx-auto">
               estrapatch is not a medical device. Estimates are for informational and educational purposes only. Use at your own risk.
             </p>
